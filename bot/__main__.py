@@ -1,5 +1,6 @@
-from pathlib import Path
 from json import loads, dumps
+from pathlib import Path
+
 from lightbulb import Bot
 
 from bot.commands.crypto import Crypto
