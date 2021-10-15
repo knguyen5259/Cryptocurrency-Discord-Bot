@@ -1,8 +1,8 @@
 from time import time
 from typing import Optional
 
-from lightbulb import Plugin, command, Context
 from aiohttp import ClientSession
+from lightbulb import Plugin, command, Context
 
 
 class Crypto(Plugin):
