@@ -1,10 +1,10 @@
-from json import loads, dumps
+from ujson import loads, dumps
 from pathlib import Path
 
-from lightbulb import Bot
-
+from bot.bot import CryptoBot
 from bot.commands.crypto import Crypto
 from bot.commands.misc import Misc
+from bot.markets import Markets
 
 
 def main() -> None:
@@ -21,12 +21,16 @@ def main() -> None:
     with open("config.json", "r", encoding="utf-8") as file:
         config = loads(file.read())
 
-    bot = Bot(
+    bot = CryptoBot(
         token=config["token"],
-        prefix=config["prefix"]
+        prefix=config["prefix"],
+        markets=Markets(
+            file="markets.json",
+            rate_limit=config["rate_limit"]
+        )
     )
 
-    bot.add_plugin(Crypto(config["rate_limit"]))
+    bot.add_plugin(Crypto())
     bot.add_plugin(Misc())
 
     bot.run()
