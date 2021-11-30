@@ -14,3 +14,12 @@ class Crypto(Plugin):
             await ctx.respond(f"Price: ${coin_price}")
         else:
             await ctx.respond("Sorry, coin not found.")
+
+    @command("change", "Gets the 24 hour change of a cryptocurrency")
+    async def change(self, ctx: Context, coin: str) -> None:
+        coin_change = await self.bot.markets.get_day_change(coin)
+
+        if coin_change is not None:
+            await ctx.respond(f"Change: ${coin_change}")
+        else:
+            await ctx.respond("Sorry, coin not found.")

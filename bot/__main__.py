@@ -1,5 +1,8 @@
-from ujson import loads, dumps
+import asyncio
 from pathlib import Path
+
+import aiofiles
+from ujson import loads, dumps
 
 from bot.bot import CryptoBot
 from bot.commands.crypto import Crypto
@@ -7,10 +10,10 @@ from bot.commands.misc import Misc
 from bot.markets import Markets
 
 
-def main() -> None:
+async def main() -> None:
     if not Path("config.json").exists():
-        with open("config.json", "w", encoding="utf-8") as file:
-            file.write(dumps({
+        async with aiofiles.open("config.json", "w", encoding="utf-8") as file:
+            await file.write(dumps({
                 "token": "BOT TOKEN",
                 "prefix": "BOT PREFIX",
                 "rate_limit": 30  # seconds
@@ -18,8 +21,8 @@ def main() -> None:
 
         return
 
-    with open("config.json", "r", encoding="utf-8") as file:
-        config = loads(file.read())
+    async with aiofiles.open("config.json", "r", encoding="utf-8") as file:
+        config = loads(await file.read())
 
     bot = CryptoBot(
         token=config["token"],
@@ -37,4 +40,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    asyncio.get_event_loop().run_until_complete(main())

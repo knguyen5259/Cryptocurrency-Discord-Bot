@@ -1,4 +1,5 @@
 from time import time
+from typing import Optional
 
 import aiofiles
 from ujson import loads
@@ -12,24 +13,34 @@ class Markets(object):
         self.last_request = 0
 
     async def _update_markets(self) -> None:
-        markets = ""
-
         async with ClientSession() as session:
             async with session.get("https://www.cryptingup.com/api/markets") as response:
                 markets = await response.text()
                 self.last_request = int(time())
 
-        async with aiofiles.open(self.file, "w") as file:
+        async with aiofiles.open(self.file, "w", encoding="utf-8") as file:
             await file.write(markets)
 
     async def _get_markets(self) -> dict:
-        async with aiofiles.open(self.file, "r") as file:
+        async with aiofiles.open(self.file, "r", encoding="utf-8") as file:
             return loads(await file.read())
 
-    async def get_coin(self, coin: str) -> str:
+    async def _get_coin_market(self, coin: str) -> Optional[dict]:
         if int(time()) - self.last_request > self.rate_limit or self.last_request == 0:
             await self._update_markets()
 
         for market in (await self._get_markets())["markets"]:
             if market["base_asset"] == coin.upper():
-                return "{:.10f}".format(market["price"])
+                return market
+
+    async def get_coin(self, coin: str) -> Optional[str]:
+        market = await self._get_coin_market(coin)
+
+        if market is not None:
+            return "{:.20f}".format(market["price"])
+
+    async def get_day_change(self, coin: str) -> Optional[str]:
+        market = await self._get_coin_market(coin)
+
+        if market is not None:
+            return "{:.20f}".format(market["change_24h"])
